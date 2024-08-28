@@ -1,0 +1,26 @@
+[project]
+name = "bcam"
+version = "0.0.1"
+
+[tool.black]
+target-version = ['py312']
+
+[tool.ruff]
+select = ['A', 'ANN', 'ARG', 'B', 'C', 'E', 'ERA', 'F', 'I', 'ICN', 'N', 'RET', 'S', 'SIM', 'T', 'TID', 'UP', 'W']
+ignore = ['ANN002', 'ANN003', 'ANN101', 'ANN102', 'N803', 'N806']
+target-version = 'py312'
+
+[tool.ruff.lint.extend-per-file-ignores]
+# https://github.com/astral-sh/ruff/issues/4368
+"test/**/*.py" = [
+    "S101", # asserts allowed in tests...
+    #"ARG", # Unused function args -> fixtures nevertheless are functionally relevant...
+    #"FBT", # Don't care about booleans as positional arguments in tests, e.g. via @pytest.mark.parametrize()
+    #"PLR2004", # Magic value used in comparison, ...
+    "S311", # Standard pseudo-random generators are not suitable for cryptographic purposes
+]
+
+[tool.pytest.ini_options]
+testpaths = ['test']
+pythonpath = ['./']
+
