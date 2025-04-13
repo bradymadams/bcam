@@ -1,6 +1,6 @@
 from collections.abc import Generator, Iterable
 
-from bcam.path import Path, _Operation
+from bcam.path import Operation, Path
 
 
 class Program:
@@ -10,7 +10,7 @@ class Program:
         self._name = name
         self._paths: list[Path] = []
 
-    def __iter__(self) -> Generator[_Operation, None, None]:
+    def __iter__(self) -> Generator[Operation, None, None]:
         """Iterate through all operations in all paths."""
         for path in self._paths:
             yield from path

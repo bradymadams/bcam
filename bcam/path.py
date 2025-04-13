@@ -13,7 +13,7 @@ class Config:
     cut_feed: float = 1000.0
 
 
-class _Operation:
+class Operation:
     def gcode(self) -> list[str]:
         raise NotImplementedError
 
@@ -22,7 +22,7 @@ class _Operation:
         # return f" {arg}{value:7.2f}" if value is not None else ""
 
 
-class _Comment(_Operation):
+class _Comment(Operation):
     def __init__(self, text: str) -> None:
         self._text = text
 
@@ -30,7 +30,7 @@ class _Comment(_Operation):
         return [f"; {self._text}"]
 
 
-class _Move(_Operation):
+class _Move(Operation):
     def __init__(
         self,
         x: Coord = None,
@@ -55,7 +55,7 @@ class _Move(_Operation):
         return [f"G{code}{x}{y}{z}{f}"]
 
 
-class _Arc(_Operation):
+class _Arc(Operation):
     def __init__(
         self,
         i: Coord,
@@ -106,14 +106,14 @@ class Path:
     ) -> None:
         self._tool = tool
         self._name = name
-        self._operations: list[_Operation] = [_Comment(f"({self._name})")]
+        self._operations: list[Operation] = [_Comment(f"({self._name})")]
         self._pos = (0.0, 0.0, 0.0)
         self._config = config or Config()
 
         if home:
             self.home()
 
-    def __iter__(self) -> Generator[_Operation, None, None]:
+    def __iter__(self) -> Generator[Operation, None, None]:
         yield from self._operations
 
     def _set_position(self, x: Coord = None, y: Coord = None, z: Coord = None) -> None:
