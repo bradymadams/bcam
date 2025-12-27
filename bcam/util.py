@@ -1,9 +1,9 @@
-from bcam.program import Program
+from bcam.path import Path
 from bcam.tool import EndMill
 
 
 def cut_hole(
-    prog: Program,
+    path: Path,
     diameter: float,
     x: float,
     y: float,
@@ -13,23 +13,23 @@ def cut_hole(
     dz: float | None = None,
     clockwise: bool = True,
 ) -> None:
-    if not isinstance(prog.tool, EndMill):
+    if not isinstance(path.tool, EndMill):
         raise Exception("cut_hole requires an EndMill tool")
 
     if ztop <= zbot:
         raise Exception("ztop must be greater than zbot")
 
-    if diameter < prog.tool.diameter:
+    if diameter < path.tool.diameter:
         raise Exception(
             "Tool diameter ({prog.tool.diameter}) is greater "
             "than hole diameter ({diameter})"
         )
 
-    if diameter == prog.tool.diameter:
+    if diameter == path.tool.diameter:
         raise Exception("TODO need to implement plunge hole cut")
 
-    prog.rapid(z=zsafe)
-    prog.rapid(x=x, y=(y + diameter / 2 - prog.tool.radius))
+    path.rapid(z=zsafe)
+    path.rapid(x=x, y=(y + diameter / 2 - path.tool.radius))
 
     if dz is None or dz == 0.0:
         dz = ztop - zbot
@@ -38,21 +38,20 @@ def cut_hole(
 
     z = ztop - dz
     while True:
-        prog.cut(z=z)
-        prog.cut_circle(xc=x, yc=y, clockwise=clockwise)
+        path.cut(z=z)
+        path.cut_circle(xc=x, yc=y, clockwise=clockwise)
 
         if z <= zbot:
             break
 
         z = max(zbot, z - dz)
 
-    prog.rapid(z=zsafe)
+    path.rapid(z=zsafe)
 
 
 def transform_bcnc_probe_file(
     probe_path: str, probe_out: str, dx: float, dy: float
 ) -> None:
-
     probe_config = []
     probe_points = []
     with open(probe_path) as f:
