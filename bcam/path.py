@@ -102,7 +102,7 @@ class Path:
         tool: Tool,
         name: str = "default",
         config: Config | None = None,
-        home: bool = True,
+        home: bool = False,
     ) -> None:
         self._tool = tool
         self._name = name
