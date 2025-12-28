@@ -1,3 +1,3 @@
-from . import gcode, path, program, tool, util
+from . import error, gcode, path, program, tool, util
 
-__all__ = ["gcode", "path", "program", "tool", "util"]
+__all__ = ["error", "gcode", "path", "program", "tool", "util"]

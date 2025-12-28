@@ -1,6 +1,8 @@
 import dataclasses
 from collections.abc import Generator
+from typing import TypeGuard
 
+from bcam.error import BCAMError, UnknownPositionError
 from bcam.tool import Tool
 
 Coord = float | None
@@ -83,12 +85,21 @@ class _Arc(Operation):
         return ["G17", f"G{code}{x}{y}{i}{j}{f}"]
 
 
+def _position_fully_defined(
+    pos: tuple[Coord, Coord, Coord],
+) -> TypeGuard[tuple[float, float, float]]:
+    return all(s is not None for s in pos)
+
+
 def _coordinates_from_delta(
-    pos: tuple[float, float, float],
+    pos: tuple[Coord, Coord, Coord],
     dx: Coord = None,
     dy: Coord = None,
     dz: Coord = None,
 ) -> tuple[Coord, Coord, Coord]:
+    if not _position_fully_defined(pos):
+        raise UnknownPositionError
+
     x = pos[0] + dx if dx else None
     y = pos[1] + dy if dy else None
     z = pos[2] + dz if dz else None
@@ -107,7 +118,7 @@ class Path:
         self._tool = tool
         self._name = name
         self._operations: list[Operation] = [_Comment(f"({self._name})")]
-        self._pos = (0.0, 0.0, 0.0)
+        self._pos: tuple[Coord, Coord, Coord] = (None, None, None)
         self._config = config or Config()
 
         if home:
@@ -117,7 +128,11 @@ class Path:
         yield from self._operations
 
     def _set_position(self, x: Coord = None, y: Coord = None, z: Coord = None) -> None:
-        self._pos = (x or self._pos[0], y or self._pos[1], z or self._pos[2])
+        self._pos = (
+            x if x is not None else self._pos[0],
+            y if y is not None else self._pos[1],
+            z if z is not None else self._pos[2],
+        )
 
     @property
     def tool(self) -> Tool:
@@ -159,6 +174,9 @@ class Path:
     def cut_circle(
         self, *, xc: float, yc: float, feed: Feed = None, clockwise: bool = True
     ) -> None:
+        if not _position_fully_defined(self._pos):
+            raise UnknownPositionError
+
         # Start and end position are the same, so no need to call _set_position
         self._operations.append(
             _Arc(
