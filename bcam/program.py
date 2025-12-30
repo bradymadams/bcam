@@ -1,4 +1,4 @@
-from collections.abc import Generator, Iterable
+from collections.abc import Generator
 
 from bcam.path import Operation, Path
 
@@ -23,24 +23,7 @@ class Program:
     def paths(self) -> list[Path]:
         return self._paths
 
-    def add_path(self, path: Path) -> None:
+    def add_path(self, path: Path) -> Path:
         """Add a path to the program."""
         self._paths.append(path)
-
-    def add_paths(self, paths: Iterable[Path]) -> None:
-        """Add multiple paths to the program."""
-        self._paths.extend(paths)
-
-    def get_path(self, name: str) -> Path | None:
-        """Get a path by name."""
-        for path in self._paths:
-            if path.name == name:
-                return path
-        return None
-
-    def remove_path(self, path: Path) -> bool:
-        """Remove a path from the program."""
-        if path in self._paths:
-            self._paths.remove(path)
-            return True
-        return False
+        return path
